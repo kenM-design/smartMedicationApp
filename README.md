@@ -1,0 +1,1 @@
+Smart Medication App - A medication application that remind user to take their medication on time. The Smart Medication Application is built with Kotlin and Jetpack Compose, along with Room Database and WorkManager for reliable background notifications.
