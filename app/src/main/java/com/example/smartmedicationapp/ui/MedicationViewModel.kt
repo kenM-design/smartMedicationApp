@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.smartmedicationapp.data.Medication
 import com.example.smartmedicationapp.data.MedicationRepository
+import com.example.smartmedicationapp.worker.AlarmScheduler
 import com.example.smartmedicationapp.worker.WorkManagerHelper
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,13 +26,13 @@ class MedicationViewModel(
             val generatedId = repository.insertMedication(medication).toInt()
             // Schedule with the real auto-generated ID
             val savedMedication = medication.copy(id = generatedId)
-            WorkManagerHelper.scheduleMedicationReminder(appContext, savedMedication)
+            AlarmScheduler.scheduleMedicationReminder(appContext, savedMedication)
         }
     }
 
     fun deleteMedication(medication: Medication) {
         viewModelScope.launch {
-            WorkManagerHelper.cancelMedicationReminder(appContext, medication.id)
+            AlarmScheduler.cancelMedicationReminder(appContext, medication)
             repository.deleteMedication(medication)
         }
     }
@@ -39,14 +40,14 @@ class MedicationViewModel(
     fun updateMedication(medication: Medication) {
         viewModelScope.launch {
             // Cancel old reminder
-            WorkManagerHelper.cancelMedicationReminder(appContext, medication.id)
+            AlarmScheduler.cancelMedicationReminder(appContext, medication)
 
             // Update in database
             repository.updateMedication(medication)
 
             // Schedule new reminder (only if not taken)
             if (!medication.isTaken) {
-                WorkManagerHelper.scheduleMedicationReminder(appContext, medication)
+                AlarmScheduler.scheduleMedicationReminder(appContext, medication)
             }
         }
     }

@@ -1,9 +1,14 @@
 package com.example.smartmedicationapp
 
 import android.Manifest
+import android.content.Context                          // ← add
+import android.content.Intent                          // ← add
 import android.content.pm.PackageManager
+import android.net.Uri                                 // ← add
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager                         // ← add
+import android.provider.Settings                       // ← add
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -17,7 +22,6 @@ import com.example.smartmedicationapp.data.MedicationRepository
 import com.example.smartmedicationapp.notification.NotificationHelper
 import com.example.smartmedicationapp.ui.MedicationViewModel
 import com.example.smartmedicationapp.ui.MedicationViewModelFactory
-import com.example.smartmedicationapp.ui.screens.AddMedicationScreen
 import com.example.smartmedicationapp.ui.screens.HomeScreen
 import com.example.smartmedicationapp.ui.screens.MedicationFormScreen
 import com.example.smartmedicationapp.ui.theme.SmartMedicationAppTheme
@@ -39,6 +43,17 @@ class MainActivity : ComponentActivity() {
 
             if (!granted) requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
+
+        // ↓↓↓ ADD THIS BLOCK HERE ↓↓↓
+        // Request battery optimization exemption so alarms fire in the background
+        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                data = Uri.parse("package:$packageName")
+            }
+            startActivity(intent)
+        }
+        // ↑↑↑ END OF NEW BLOCK ↑↑↑
 
         // Create notification channel once at startup
         NotificationHelper.createNotificationChannel(this)

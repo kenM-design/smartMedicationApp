@@ -5,11 +5,13 @@
     <!-- Notification permission (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- WorkManager / Foreground Service -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- Wake lock so the alarm fires even when screen is off -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <!-- System resilience: reschedule after reboot -->
+    <!-- Battery optimization exemption request -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <!-- Reschedule alarms after reboot -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
@@ -39,15 +41,24 @@
             android:foregroundServiceType="dataSync"
             tools:node="merge" />
 
+        <!-- BroadcastReceiver: fires exact alarm to show notification -->
+        <receiver
+            android:name=".receiver.AlarmReceiver"
+            android:exported="false" />
+
         <!-- BroadcastReceiver: "Mark as Taken" notification action -->
         <receiver
             android:name=".receiver.MarkAsTakenReceiver"
             android:exported="false" />
 
+        <receiver
+            android:name=".receiver.AlarmReceiver"
+            android:exported="false" />
+
         <!-- BroadcastReceiver: reschedule on device boot -->
         <receiver
             android:name=".receiver.BootReceiver"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
